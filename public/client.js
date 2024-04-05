@@ -10,6 +10,21 @@ const storedFirstName = localStorage.getItem('name');
 name = storedFirstName ? storedFirstName : 'User';
 const senderID = localStorage.getItem('userID');
 
+const defaultPage = () => {
+    chatArea.innerHTML = `
+        <div style="font-family: Arial, sans-serif; color: #333; text-align: center;">
+            <div style="background-color: #f9f9f9; border-radius: 10px; padding: 40px 20px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+                <h2 style="margin-bottom: 20px; font-size: 1.5em;">Welcome to the Chat</h2>
+                <p style="margin: 0; font-size: 1.2em;">Start the conversation by sending your first message.</p>
+                <div style="margin-top: 20px;">
+                    <span style="color: #ff69b4;">🎉</span> <span style="color: #ff4500;">🎊</span> <span style="color: #00bfff;">🎈</span>
+                </div>
+                <p style="margin-top: 30px; font-size: 1.2em;">Feel free to explore and enjoy!</p>
+            </div>
+        </div>
+    `;
+}
+
 window.addEventListener('load', async () => {
     try {
         // Get the JWT token from localStorage
@@ -40,23 +55,6 @@ window.addEventListener('load', async () => {
         console.error('Error fetching user list:', error);
     }
 });
-
-
-const defaultPage = () => {
-    chatArea.innerHTML = `
-        <div style="font-family: Arial, sans-serif; color: #333; text-align: center;">
-            <div style="background-color: #f9f9f9; border-radius: 10px; padding: 40px 20px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
-                <h2 style="margin-bottom: 20px; font-size: 1.5em;">Welcome to the Chat</h2>
-                <p style="margin: 0; font-size: 1.2em;">Start the conversation by sending your first message.</p>
-                <div style="margin-top: 20px;">
-                    <span style="color: #ff69b4;">🎉</span> <span style="color: #ff4500;">🎊</span> <span style="color: #00bfff;">🎈</span>
-                </div>
-                <p style="margin-top: 30px; font-size: 1.2em;">Feel free to explore and enjoy!</p>
-            </div>
-        </div>
-    `;
-}
-
 
 function sendMessage(message) {
     let receiverId = getSelectedUserId();
@@ -144,6 +142,7 @@ function selectUser(selectedUser) {
             }
             chatWindow.classList.add('active');
         }
+        messageTextarea.value = '';
         fetchConversation(userId);
 
         // Show message input
@@ -169,12 +168,21 @@ socket.on('message', (msg) => {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 document.getElementById('sendMessageBtn').addEventListener('click', () => {
-    sendMessage(messageTextarea.value);
+    const message = messageTextarea.value.trim();
+    if (message) {
+        if (message !== '') {
+            sendMessage(message);
+        }
+    }
+    // sendMessage(messageTextarea.value);
 });
 
 messageTextarea.addEventListener('keyup', (e) => {
     if (e.key === 'Enter') {
-        sendMessage(e.target.value);
+        const message = e.target.value.trim();
+        if (message !== '') {
+            sendMessage(message);
+        }
     }
 });
 
