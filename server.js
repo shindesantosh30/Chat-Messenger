@@ -52,7 +52,7 @@ app.use('/message', messagesRouter);
 app.use('/contact-users', userRouter);
 
 io.on('connection', (socket) => {
-    console.log('socket is on');
+    console.log('socket connected');
 
     socket.on('message', async (message) => {
         try {
@@ -71,5 +71,5 @@ io.on('connection', (socket) => {
 const PORT = process.env.PORT || 3030;
 server.listen(PORT, () => {
     console.log(`Server listening on port ${PORT}
-development server is running : http://localhost:${PORT}/`);
+development server is running on : http://localhost:${PORT}/`);
 });
