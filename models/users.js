@@ -11,7 +11,7 @@ const User = sequelize.define('User', {
   },
   username: {
     type: Sequelize.STRING,
-    allowNull: false
+    allowNull: true
   },
   mobile: {
     type: Sequelize.STRING,
@@ -24,7 +24,8 @@ const User = sequelize.define('User', {
   lastName: {
     type: Sequelize.STRING,
     allowNull: false
-  },  email: {
+  },
+  email: {
     type: Sequelize.STRING,
     allowNull: false
   },
@@ -34,7 +35,7 @@ const User = sequelize.define('User', {
   },
   roleId: {
     type: Sequelize.INTEGER,
-    allowNull: false,
+    allowNull: true,
     references: {
       model: 'Roles',
       key: 'id'

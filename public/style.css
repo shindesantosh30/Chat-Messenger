@@ -128,13 +128,13 @@ body {
 }
 
 .incoming {
-    background: linear-gradient(45deg, #1659be, #217b87, #200939);
+    background: linear-gradient(45deg, #2f3333, #373e3f, #4e5552);
     color: #fff;
 
 }
 
 .outgoing {
-    background: linear-gradient(45deg, #1341b3, #2348a4, #134794);
+    background: linear-gradient(45deg, #07240a, #0d4b17, #1da718);
     color: #ffffff;
     margin-left: auto;
 }
@@ -197,4 +197,52 @@ li::after {
     color: #f0f2f5;
     border: 1px solid #02181b;
     background: linear-gradient(45deg, #154a63, #0b8b9c);
+}
+
+.message-options {
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 0.5rem;
+}
+
+.options-button {
+    background: none;
+    border: none;
+    color: inherit;
+    font-size: inherit;
+    cursor: pointer;
+    padding: 0;
+}
+
+.dropdown {
+    display: inline-block;
+    position: relative;
+}
+
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background-color: #1f9cc2;
+    min-width: 120px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    z-index: 1;
+}
+
+.dropdown-menu.show {
+    display: block;
+}
+
+.dropdown-item {
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    color: #333;
+}
+
+.dropdown-item:hover {
+    background-color: #000000;
+    color: white;
 }

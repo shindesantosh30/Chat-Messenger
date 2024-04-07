@@ -17,7 +17,7 @@ async function register(req, res) {
         const newUser = await User.create({ username, email, mobile, password: hashedPassword, firstName, lastName, address, gender, roleId: role.id });
         res.status(201).json(newUser);
     } catch (error) {
-        console.error('Error registering user:', error);
+        console.error('Exception ', error);
         res.status(500).send('Internal Server Error');
     }
 }
@@ -28,15 +28,14 @@ async function login(req, res) {
         const { email, password } = req.body;
         const user = await User.findOne({ where: { email } });
         if (!user) {
-            return res.status(404).json({ error: 'User not found' });
+            return res.status(400).json({ error: 'Email does not exists' });
         }
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) {
-            return res.status(401).json({ error: 'Invalid password' });
+            return res.status(400).json({ error: 'Invalid password' });
         }
         // Generate JWT token
-        const token = jwt.sign({ userId: user.id }, 'access_token', { expiresIn: '1h' });
-        console.log("TOKEN : ", token);
+        const token = jwt.sign({ userId: user.id }, 'access_token', { expiresIn: '8h' });
 
         res.status(200).json({ token, user: { id: user.id, email: user.email, firstName: user.firstName } });
 

@@ -32,7 +32,7 @@ window.addEventListener('load', async () => {
         if (!token) {
             throw new Error('Internal server error !!!');
         }
-        const url = `/contact-users?userId=${senderID}`;
+        const url = `/contact-users?type=all`;
         const response = await fetch(url, {
             method: 'GET',
             headers: {
@@ -80,14 +80,72 @@ const distributeMessage = (message) => {
     appendMessage(message, type);
 };
 
+// Function to append a message
 function appendMessage(msg, type) {
     let messageDiv = document.createElement('div');
     let className = type;
     messageDiv.classList.add(className, 'message');
-    let markup = `<p>${msg.message}</p><small>${formatTime(msg.createdAt)}</small>`;
+    let markup = `
+        <div class="message-options">
+            <div class="dropdown">
+                <button class="dropdown-toggle options-button" type="button">...</button>
+                <div class="dropdown-menu">
+                    <a class="dropdown-item edit-message" href="#">Edit</a>
+                    <a class="dropdown-item delete-message" href="#">Delete</a>
+                </div>
+            </div>
+        </div>
+        <div class="message-content">
+            <p>${msg.message}</p>
+            <small>${formatTime(msg.createdAt)}</small>
+        </div>`;
     messageDiv.innerHTML = markup;
+
+    // Add event listener to the options button
+    const optionsButton = messageDiv.querySelector('.options-button');
+    const dropdownMenu = messageDiv.querySelector('.dropdown-menu');
+    optionsButton.addEventListener('click', function(e) {
+        e.stopPropagation();
+        dropdownMenu.classList.toggle('show');
+    });
+
+    // Add event listener for the edit action
+    const editButton = messageDiv.querySelector('.edit-message');
+    editButton.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        editMessage(msg, messageDiv);
+        dropdownMenu.classList.remove('show');
+    });
+
+    // Add event listener for the delete action
+    const deleteButton = messageDiv.querySelector('.delete-message');
+    deleteButton.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        deleteMessage(msg.id);
+        messageDiv.remove();
+        dropdownMenu.classList.remove('show');
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function() {
+        dropdownMenu.classList.remove('show');
+    });
     chatArea.appendChild(messageDiv);
 }
+
+// Function to delete a message
+function deleteMessage(messageId) {
+    console.log("Message will delete");
+}
+
+// Function to update a message via API call
+function updateMessage(updatedMessage) {
+    // Replace this with your actual API endpoint and implementation
+    console.log("Updating message:", updatedMessage);
+}
+
 
 const formatTime = (time) => {
     const date = time ? new Date(time) : new Date();
@@ -174,7 +232,6 @@ document.getElementById('sendMessageBtn').addEventListener('click', () => {
             sendMessage(message);
         }
     }
-    // sendMessage(messageTextarea.value);
 });
 
 messageTextarea.addEventListener('keyup', (e) => {
@@ -225,3 +282,44 @@ async function fetchConversation(receiver) {
     }
 }
 
+// Function to update a message using SweetAlert
+function editMessage(msg, messageDiv) {
+    Swal.fire({
+        title: 'Edit Message',
+        input: 'text',
+        inputValue: msg.message,
+        inputPlaceholder: 'Update message',
+        showCancelButton: true,
+        cancelButtonText: 'Cancel',
+        confirmButtonText: 'Save',
+        inputValidator: (value) => {
+            if (!value) {
+                return 'You need to enter something!';
+            }
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const newText = result.value;
+            // Make API call to update the message with the new text
+            const updatedMessage = {
+                id: msg.id,
+                message: newText,
+                // Add any other properties needed for the update
+            };
+            // Assuming you have an updateMessage function to handle the API call
+            updateMessage(updatedMessage);
+            // Update the message content in the UI
+            const messageContent = messageDiv.querySelector('.message-content');
+            messageContent.querySelector('p').textContent = newText;
+        }
+    });
+}
+
+function showPopUp(type, message, showConfirm=false) {
+    Swal.fire({
+        icon: type,
+        title: message,
+        showConfirmButton: showConfirm,
+        timer: 3000
+    });
+}

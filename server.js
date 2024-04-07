@@ -14,42 +14,25 @@ const app = express();
 const server = http.createServer(app);
 const io = socketio(server);
 
-// const sequelize = require('./config/sequelize')
-// Database connection
-// (async () => {
-//     try {
-//         await sequelize.authenticate();
-//         await sequelize.sync();
-//         console.log('All models were sync successfully.');
-//     } catch (error) {
-//         console.error('Unable to connect to the database:', error);
-//     }
-// })();
-
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+const authGuard = require('./middleware/authMiddleware');
 
 // Serve static files
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'views')));
 
 // Routes
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
-});
+app.get('/messenger', (req, response) => { response.sendFile(path.join(__dirname, 'index.html')); });
 
-app.get('/register', (req, res) => {
-    res.sendFile(path.join(__dirname, 'views', 'register.html'));
-});
+app.get('/register', (req, response) => { response.sendFile(path.join(__dirname, 'views', 'register.html')); });
 
-app.get('/login', (req, res) => {
-    res.sendFile(path.join(__dirname, 'views', 'login.html'));
-});
+app.get('/', (req, response) => { response.sendFile(path.join(__dirname, 'views', 'login.html')); });
 
 app.use('/user', authRoutes);
 app.use('/message', messagesRouter);
-app.use('/contact-users', userRouter);
+app.use('/contact-users', authGuard, userRouter);
 
 io.on('connection', (socket) => {
     console.log('socket connected');
