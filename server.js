@@ -31,7 +31,7 @@ app.get('/register', (req, response) => { response.sendFile(path.join(__dirname,
 app.get('/', (req, response) => { response.sendFile(path.join(__dirname, 'views', 'login.html')); });
 
 app.use('/user', authRoutes);
-app.use('/message', messagesRouter);
+app.use('/message', authGuard, messagesRouter);
 app.use('/contact-users', authGuard, userRouter);
 
 io.on('connection', (socket) => {

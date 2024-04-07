@@ -104,14 +104,14 @@ function appendMessage(msg, type) {
     // Add event listener to the options button
     const optionsButton = messageDiv.querySelector('.options-button');
     const dropdownMenu = messageDiv.querySelector('.dropdown-menu');
-    optionsButton.addEventListener('click', function(e) {
+    optionsButton.addEventListener('click', function (e) {
         e.stopPropagation();
         dropdownMenu.classList.toggle('show');
     });
 
     // Add event listener for the edit action
     const editButton = messageDiv.querySelector('.edit-message');
-    editButton.addEventListener('click', function(e) {
+    editButton.addEventListener('click', function (e) {
         e.preventDefault();
         e.stopPropagation();
         editMessage(msg, messageDiv);
@@ -120,7 +120,7 @@ function appendMessage(msg, type) {
 
     // Add event listener for the delete action
     const deleteButton = messageDiv.querySelector('.delete-message');
-    deleteButton.addEventListener('click', function(e) {
+    deleteButton.addEventListener('click', function (e) {
         e.preventDefault();
         e.stopPropagation();
         deleteMessage(msg.id);
@@ -129,22 +129,59 @@ function appendMessage(msg, type) {
     });
 
     // Close dropdown when clicking outside
-    document.addEventListener('click', function() {
+    document.addEventListener('click', function () {
         dropdownMenu.classList.remove('show');
     });
     chatArea.appendChild(messageDiv);
 }
 
 // Function to delete a message
-function deleteMessage(messageId) {
+async function deleteMessage(messageId) {
+    const url = `/message/${messageId}`;
+    const token = localStorage.getItem('token');
+    if (!token) {
+        throw new Error('Internal server error !!!');
+    }
+    const response = await fetch(url, {
+        method: 'DELETE',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        },
+    });
+    if (response.ok) {
+        const responseData = await response.json();
+        showPopUp('success', responseData.message, expireIn = 3500);
+    } else {
+        const errorData = await response.json();
+        showPopUp('error', errorData.message);
+    }
     console.log("Message will delete");
 }
 
-// Function to update a message via API call
-function updateMessage(updatedMessage) {
-    // Replace this with your actual API endpoint and implementation
-    console.log("Updating message:", updatedMessage);
+async function updateMessage(updatedMessage) {
+    const url = `/message/${updatedMessage.id}`;
+    const token = localStorage.getItem('token');
+    if (!token) {
+        throw new Error('Internal server error !!!');
+    }
+    const response = await fetch(url, {
+        method: 'PUT',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(updatedMessage)
+    });
+    if (response.ok) {
+        const responseData = await response.json();
+        showPopUp('success', responseData.message, expireIn = 2000);
+    } else {
+        const errorData = await response.json();
+        showPopUp('error', errorData.message);
+    }
 }
+
 
 
 const formatTime = (time) => {
@@ -252,6 +289,9 @@ async function fetchConversation(receiver) {
         const url = `/message?sender=${senderID}&receiver=${receiver}`;
         console.log("RECEIVER ", receiver, "SENDER ", senderID);
         const token = localStorage.getItem('token');
+        if (!token) {
+            throw new Error('Internal server error !!!');
+        }
         const response = await fetch(url, {
             headers: {
                 'Authorization': `Bearer ${token}`
@@ -282,7 +322,6 @@ async function fetchConversation(receiver) {
     }
 }
 
-// Function to update a message using SweetAlert
 function editMessage(msg, messageDiv) {
     Swal.fire({
         title: 'Edit Message',
@@ -300,13 +339,10 @@ function editMessage(msg, messageDiv) {
     }).then((result) => {
         if (result.isConfirmed) {
             const newText = result.value;
-            // Make API call to update the message with the new text
             const updatedMessage = {
                 id: msg.id,
                 message: newText,
-                // Add any other properties needed for the update
             };
-            // Assuming you have an updateMessage function to handle the API call
             updateMessage(updatedMessage);
             // Update the message content in the UI
             const messageContent = messageDiv.querySelector('.message-content');
@@ -315,11 +351,11 @@ function editMessage(msg, messageDiv) {
     });
 }
 
-function showPopUp(type, message, showConfirm=false) {
+function showPopUp(type = 'success', message = "Ok", showConfirm = false, expireIn = 1500) {
     Swal.fire({
         icon: type,
         title: message,
         showConfirmButton: showConfirm,
-        timer: 3000
+        timer: expireIn
     });
 }
