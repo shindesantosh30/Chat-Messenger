@@ -85,55 +85,64 @@ function appendMessage(msg, type) {
     let messageDiv = document.createElement('div');
     let className = type;
     messageDiv.classList.add(className, 'message');
-    let markup = `
-        <div class="message-options">
-            <div class="dropdown">
-                <button class="dropdown-toggle options-button" type="button">...</button>
-                <div class="dropdown-menu">
-                    <a class="dropdown-item edit-message" href="#">Edit</a>
-                    <a class="dropdown-item delete-message" href="#">Delete</a>
+    let markup = '';
+
+    if (type === 'outgoing') {
+        markup += `
+            <div class="message-options">
+                <div class="dropdown">
+                    <button class="dropdown-toggle options-button" type="button">...</button>
+                    <div class="dropdown-menu">
+                        <a class="dropdown-item edit-message" href="#">Edit</a>
+                        <a class="dropdown-item delete-message" href="#">Delete</a>
+                    </div>
                 </div>
-            </div>
-        </div>
+            </div>`;
+    }
+
+    markup += `
         <div class="message-content">
             <p>${msg.message}</p>
             <small>${formatTime(msg.createdAt)}</small>
         </div>`;
+
     messageDiv.innerHTML = markup;
 
-    // Add event listener to the options button
-    const optionsButton = messageDiv.querySelector('.options-button');
-    const dropdownMenu = messageDiv.querySelector('.dropdown-menu');
-    optionsButton.addEventListener('click', function (e) {
-        e.stopPropagation();
-        dropdownMenu.classList.toggle('show');
-    });
+    // Add event listener to the options button if it's an outgoing message
+    if (type === 'outgoing') {
+        const optionsButton = messageDiv.querySelector('.options-button');
+        const dropdownMenu = messageDiv.querySelector('.dropdown-menu');
+        optionsButton.addEventListener('click', function (e) {
+            e.stopPropagation();
+            dropdownMenu.classList.toggle('show');
+        });
 
-    // Add event listener for the edit action
-    const editButton = messageDiv.querySelector('.edit-message');
-    editButton.addEventListener('click', function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-        editMessage(msg, messageDiv);
-        dropdownMenu.classList.remove('show');
-    });
+        // Add event listener for the edit action
+        const editButton = messageDiv.querySelector('.edit-message');
+        editButton.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            editMessage(msg, messageDiv);
+            dropdownMenu.classList.remove('show');
+        });
 
-    // Add event listener for the delete action
-    const deleteButton = messageDiv.querySelector('.delete-message');
-    deleteButton.addEventListener('click', function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-        deleteMessage(msg.id);
-        messageDiv.remove();
-        dropdownMenu.classList.remove('show');
-    });
+        // Add event listener for the delete action
+        const deleteButton = messageDiv.querySelector('.delete-message');
+        deleteButton.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            deleteMessage(msg.id);
+            messageDiv.remove();
+            dropdownMenu.classList.remove('show');
+        });
 
-    // Close dropdown when clicking outside
-    document.addEventListener('click', function () {
-        dropdownMenu.classList.remove('show');
-    });
+        document.addEventListener('click', function () {
+            dropdownMenu.classList.remove('show');
+        });
+    }
     chatArea.appendChild(messageDiv);
 }
+
 
 // Function to delete a message
 async function deleteMessage(messageId) {
@@ -358,4 +367,8 @@ function showPopUp(type = 'success', message = "Ok", showConfirm = false, expire
         showConfirmButton: showConfirm,
         timer: expireIn
     });
+}
+
+const unAuthorised = () => {
+    window.location.href = '/login';
 }

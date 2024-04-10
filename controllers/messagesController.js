@@ -9,7 +9,6 @@ class MessageController {
             const getId = request.params.id;
             const userId = request.user.id;
             const message = request.body.message;
-            console.log("SENDER ID ", userId);
 
             if (!message) {
                 return response.status(400).json({ message: 'Message is required' });

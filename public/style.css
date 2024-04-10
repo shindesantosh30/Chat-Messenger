@@ -36,6 +36,31 @@ body {
     margin-bottom: 20px;
 }
 
+.sidebar::-webkit-scrollbar {
+    width: 8px;
+}
+
+/* Track */
+.sidebar::-webkit-scrollbar-track {
+    background: #06222b;
+    /* Color of the scrollbar track */
+}
+
+/* Handle */
+.sidebar::-webkit-scrollbar-thumb {
+    background: #109e8d;
+    /* Color of the scrollbar handle */
+    border-radius: 4px;
+    /* Rounded corners of the scrollbar handle */
+}
+
+/* Handle on hover */
+.sidebar::-webkit-scrollbar-thumb:hover {
+    background: #07756a;
+    /* Color of the scrollbar handle on hover */
+}
+
+
 .user-list {
     list-style-type: none;
     padding: 0;
@@ -103,6 +128,24 @@ body {
     font-size: 16px;
     margin-left: 10px;
     height: 40px;
+}
+
+.message__area::-webkit-scrollbar {
+    width: 8px;
+}
+
+.message__area::-webkit-scrollbar-track {
+    background: #06222b;
+}
+
+/* Handle */
+.message__area::-webkit-scrollbar-thumb {
+    background: #109e8d;
+    border-radius: 4px;
+}
+
+.message__area::-webkit-scrollbar-thumb:hover {
+    background: #07756a;
 }
 
 .brand {

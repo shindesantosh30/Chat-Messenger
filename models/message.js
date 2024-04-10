@@ -1,14 +1,7 @@
-const { DataTypes, Model } = require('sequelize');
+const { DataTypes } = require('sequelize');
 const sequelize = require('../config/sequelize');
 
-class Message extends Model {
-  static associate(models) {
-    Message.belongsTo(models.User, { foreignKey: 'senderId', as: 'sender' });
-    Message.belongsTo(models.User, { foreignKey: 'receiverId', as: 'receiver' });
-  }
-}
-
-Message.init({
+const Message = sequelize.define('Message', {
   message: {
     type: DataTypes.TEXT,
     allowNull: false
@@ -28,10 +21,31 @@ Message.init({
       model: 'User',
       key: 'id'
     }
+  },
+  isEdited: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: false
+  },
+  isSeen: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: false
+  },
+  isDeleted: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: false
   }
 }, {
-  sequelize,
-  modelName: 'Message',
+  modelName: 'Messages',
+  // Other options can be specified here, such as tableName, timestamps, etc.
 });
 
-module.exports = Message; // Export the Message model
+// Define associations
+Message.associate = function (models) {
+  Message.belongsTo(models.User, { foreignKey: 'senderId', as: 'sender' });
+  Message.belongsTo(models.User, { foreignKey: 'receiverId', as: 'receiver' });
+};
+
+module.exports = Message;
