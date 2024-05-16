@@ -42,6 +42,10 @@ const User = sequelize.define('User', {
     },
     onUpdate: 'CASCADE',
     onDelete: 'CASCADE'
+  },
+  socketId: {
+    type: Sequelize.STRING,
+    allowNull: true
   }
 });
 

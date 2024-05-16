@@ -23,7 +23,8 @@
     "passport-local": "^1.0.0",
     "passport-local-sequelize": "^0.9.1",
     "sequelize": "^6.37.1",
-    "socket.io": "^4.7.5"
+    "socket.io": "^4.7.5",
+    "sweetalert2": "^11.10.7"
   },
   "devDependencies": {
     "nodemon": "^2.0.3"

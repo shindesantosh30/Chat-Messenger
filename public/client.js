@@ -67,8 +67,20 @@ function sendMessage(message) {
     appendMessage(content, 'outgoing');
     messageTextarea.value = '';
     scrollToBottom();
+    console.log("MESSAGE ", content);
+    // Initialize Socket.IO client with authentication token in handshake data
+    const token = localStorage.getItem('token'); // Get the authentication token from local storage
+    console.log("Token:", token); // Log the token to verify it's not undefined or null
+    const socket = io({
+        auth: {
+            token: token ? `Bearer ${token}` : null // Include the token in the handshake data
+        }
+    });
+    
+    // Emit message using the authenticated socket
     socket.emit('message', content);
 }
+
 
 function getSelectedUserId() {
     let selectedUser = document.querySelector('.user.selected');
@@ -275,6 +287,7 @@ document.getElementById('sendMessageBtn').addEventListener('click', () => {
     const message = messageTextarea.value.trim();
     if (message) {
         if (message !== '') {
+            console.log("Click Send Butten");
             sendMessage(message);
         }
     }
@@ -284,6 +297,8 @@ messageTextarea.addEventListener('keyup', (e) => {
     if (e.key === 'Enter') {
         const message = e.target.value.trim();
         if (message !== '') {
+
+            console.log("Click Enter Butten");
             sendMessage(message);
         }
     }
