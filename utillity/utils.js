@@ -1,6 +1,5 @@
 const constant = require('./constants')
 
-
 function getPaginationResponse(data, request) {
 
     const total_count = data.length || 0;
@@ -32,7 +31,6 @@ function getPaginationResponse(data, request) {
     return { data: categoryData, paginator };
 }
 
-
 function getSerializerError(serializer, withKey = false) {
     const msgList = [];
     try {
@@ -56,7 +54,6 @@ function getSerializerError(serializer, withKey = false) {
     return msgList;
 }
 
-
 function isAlpha(input) {
     const words = input.split(' ');
 
@@ -72,15 +69,24 @@ function areWordsAlpha(str) {
     return /^[A-Za-z]+$/.test(str);
 }
 
-
 function validateEmail(email) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
 }
 
+function getErrorMessage(error) {
+    if (error instanceof Error) { return error.message; }
+
+    else if (typeof error === 'string') { return error; }
+
+    else if (typeof error === 'object' && error !== null) { return JSON.stringify(error); }
+
+    return 'Internal server error';
+}
 
 module.exports = {
     getPaginationResponse,
     validateEmail,
-    isAlpha
+    isAlpha,
+    getErrorMessage,
 }

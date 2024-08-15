@@ -5,7 +5,6 @@ const User = require('../models/users');
 const authGuard = async (request, response, next) => {
     try {
         const token = request.headers.authorization;
-
         if (!token || !token.startsWith('Bearer ')) {
             return response.status(401).json({ error: 'Authentication credentials were not provided.' });
         }

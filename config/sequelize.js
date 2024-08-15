@@ -7,6 +7,7 @@ const DBConfig = config[env];
 const sequelize = new Sequelize(DBConfig.database, DBConfig.username, DBConfig.password, {
   host: DBConfig.host,
   dialect: DBConfig.dialect,
+  // logging: false
 });
 
 module.exports = sequelize;

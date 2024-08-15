@@ -1,15 +1,15 @@
 const express = require('express');
-const { update, list, remove, retrieve } = require('../controllers/messagesController');
+const { MessageController } = require('../controllers/messagesController');
 
 const router = express.Router();
 
-router.get('/', list);
+router.get('/', MessageController.list);
 
-router.put('/:id', update);
+router.put('/:id', MessageController.update);
 
-router.delete('/:id', remove);
+router.delete('/:id', MessageController.remove);
 
-router.get('/:id', retrieve);
+router.get('/:id', MessageController.retrieve);
 
 // router.post('/', create);
 

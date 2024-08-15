@@ -1,5 +1,6 @@
-const { Op, where } = require('sequelize');
+const { Op } = require('sequelize');
 const Message = require('../models/message');
+const User = require('../models/users');
 
 
 class MessageController {
@@ -40,6 +41,28 @@ class MessageController {
         }
     }
 
+    // static async list(request, response) {
+    //     try {
+    //         const { sender, receiver } = request.query;
+
+    //         // Fetch messages where senderId matches sender and receiverId matches receiver, or vice versa
+    //         const messages = await Message.findAll({
+    //             where: {
+    //                 [Op.or]: [
+    //                     { senderId: sender, receiverId: receiver },
+    //                     { senderId: receiver, receiverId: sender }
+    //                 ]
+    //             },
+    //             order: [['createdAt', 'ASC']]
+    //         });
+
+    //         response.json(messages);
+    //     } catch (error) {
+    //         console.error(error);
+    //         response.status(500).json({ message: 'Internal server error' });
+    //     }
+    // }
+
     static async list(request, response) {
         try {
             const { sender, receiver } = request.query;
@@ -54,10 +77,10 @@ class MessageController {
                 },
                 order: [['createdAt', 'ASC']]
             });
-
+            messages['code'] = 200
             response.json(messages);
         } catch (error) {
-            console.error(error);
+            // console.error(error);
             response.status(500).json({ message: 'Internal server error' });
         }
     }
@@ -102,4 +125,35 @@ class MessageController {
     }
 }
 
-module.exports = MessageController;
+async function createMessage(data) {
+    try {
+        console.log('Creating message with data:', data);
+
+        const newMessage = await Message.create({
+            senderId: data.message.senderId,
+            receiverId: data.message.receiverId,
+            message: data.message.message,
+            createdAt: data.message.createdAt,
+        });
+
+        console.log('Message created successfully:', newMessage);
+
+        const receiver = await User.findByPk(data.message.receiverId, {
+            attributes: ['socketId']
+        });
+
+        const socketId = receiver ? receiver.socketId : null;
+
+        return { newMessage, socketId };
+
+    } catch (error) {
+        console.error('Error in createMessage:', error);
+        throw new Error('Unable to create messages');
+    }
+}
+
+module.exports = {
+    
+    MessageController,
+    createMessage
+};
