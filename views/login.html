@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="icon" type="image/png" href="/wassup.png">
+    <link rel="stylesheet" href="loginStyleStylesheet.css">
+</head>
+
+<body>
+    <div class="container">
+        <h2>Login</h2>
+        <form id="loginForm">
+            <label for="email">Email:</label><br>
+            <input type="email" id="email" name="email" required><br>
+            <label for="password">Password:</label><br>
+            <input type="password" id="password" name="password" required><br>
+            <button type="submit">Login</button>
+            <p>Don't have an account? <a href="/register">Sign up here</a></p>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async (event) => {
+            event.preventDefault(); // Prevent form submission
+
+            // Get email and password from the form
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const response = await fetch('/user/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const token = data.token;
+
+                    console.log("TOCKEN : ", data)
+                    console.log("name : ", data.user.firstName)
+
+                    localStorage.setItem('token', token);
+                    localStorage.setItem('name', data.user.firstName);
+                    localStorage.setItem('userID', data.user.id);
+
+                    window.location.href = '/messenger';
+                    alert(`Login successfully`);
+                } else {
+                    const errorMessage = await response.json();
+                    alert(`Login failed: ${errorMessage.error}`);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An unexpected error occurred. Please try again later.');
+            }
+        });
+    </script>
+</body>
+
+</html>

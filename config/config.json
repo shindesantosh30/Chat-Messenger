@@ -1,23 +1,23 @@
 {
-  "local": {
-    "username": "root",
-    "password": "password",
-    "database": "college",
-    "host": "127.0.0.1",
-    "dialect": "mysql"
-  },
-  "development": {
-    "username": "root",
-    "password": "password",
-    "database": "chat_messanger",
-    "host": "127.0.0.1",
-    "dialect": "mysql"
-  },
-  "production": {
-    "username": "root",
-    "password": "password",
-    "database": "college",
-    "host": "127.0.0.1",
-    "dialect": "mysql"
-  }
+    "local": {
+        "username": "root",
+        "password": "password",
+        "database": "ChatMessanger",
+        "host": "127.0.0.1",
+        "dialect": "mysql"
+    },
+    "development": {
+        "username": "root",
+        "password": "password",
+        "database": "ChatMessanger",
+        "host": "127.0.0.1",
+        "dialect": "mysql"
+    },
+    "production": {
+        "username": "root",
+        "password": null,
+        "database": null,
+        "host": "127.0.0.1",
+        "dialect": "mysql"
+    }
 }

@@ -1,52 +1,28 @@
 const express = require('express');
 const http = require('http');
-const socketIo = require('socket.io');
-const messageController = require('../real-time-chat-app/src/controllers/messageController');
+const cors = require('cors');
+
+const initializeSocket = require('./controllers/socket')
+const routes = require('./routes/index')
 
 const app = express();
 const server = http.createServer(app);
-const io = socketIo(server);
 
-// Serve static files from the public directory
-app.use(express.static(__dirname + '/public'));
+app.use(cors({
+    origin: "http://localhost:4200",
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+    // credentials: true
+})); 
 
-// Socket.IO logic
-io.on('connection', async (socket) => {
-  console.log('a user connected');
+app.use(express.json());
+app.use(express.static('public'));
 
-  try {
-    // Retrieve latest messages from the database
-    const messages = await messageController.getMessages();
-    // Emit messages to the newly connected client
-    socket.emit('initialMessages', messages);
-  } catch (error) {
-    console.error('Error fetching initial messages:', error);
-  }
+app.use(routes)
 
-  // Listen for chat messages
-  socket.on('chat message', async (msg) => {
-    console.log('message: ' + msg);
- 
-    try {
-      // Save message to database
-      await messageController.saveMessage(msg);
-      console.log('Message saved to database');
-    } catch (error) {
-      console.error('Error saving message to database:', error);
-    }
+initializeSocket(server);
 
-    // Broadcast message to all connected clients
-    io.emit('chat message', msg);
-  });
- 
-  // Handle disconnect
-  socket.on('disconnect', () => {
-    console.log('user disconnected');
-  });
-});
-
-// Start the server
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-  console.log(`Server listening on http://localhost:${PORT}`);
+    console.log(`Server is running on port ${PORT}\nAccess it at: http://127.0.0.1:${PORT}/`);
 });
+
