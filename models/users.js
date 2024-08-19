@@ -46,11 +46,15 @@ const User = sequelize.define('User', {
   socketId: {
     type: Sequelize.STRING,
     allowNull: true
+  },
+  isOnline: {
+    type: Sequelize.BOOLEAN,
+    allowNull: false,
+    defaultValue: false
   }
 });
 
 // Define the association with Role
 User.belongsTo(Role, { foreignKey: 'roleId' });
 
-// Export the User model
 module.exports = User;

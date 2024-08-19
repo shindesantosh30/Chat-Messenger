@@ -78,7 +78,7 @@ class MessageController {
                 order: [['createdAt', 'ASC']]
             });
             messages['code'] = 200
-            response.json(messages);
+            response.status(200).json(messages);
         } catch (error) {
             // console.error(error);
             response.status(500).json({ message: 'Internal server error' });
@@ -136,7 +136,7 @@ async function createMessage(data) {
             createdAt: data.message.createdAt,
         });
 
-        console.log('Message created successfully:', newMessage);
+        console.log('Message send successfully:', newMessage);
 
         const receiver = await User.findByPk(data.message.receiverId, {
             attributes: ['socketId']

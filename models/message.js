@@ -36,6 +36,14 @@ const Message = sequelize.define('Message', {
     type: DataTypes.BOOLEAN,
     allowNull: false,
     defaultValue: false
+  },
+  attachment: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    references: {
+      model: 'Assets',
+      key: 'id'
+    }
   }
 }, {
   modelName: 'Messages',
@@ -46,6 +54,7 @@ const Message = sequelize.define('Message', {
 Message.associate = function (models) {
   Message.belongsTo(models.User, { foreignKey: 'senderId', as: 'sender' });
   Message.belongsTo(models.User, { foreignKey: 'receiverId', as: 'receiver' });
+  Message.belongsTo(models.Asset, { foreignKey: 'attachmentId', as: 'attachment' });
 };
 
 module.exports = Message;

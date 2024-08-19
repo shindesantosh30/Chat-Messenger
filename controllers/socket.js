@@ -42,12 +42,11 @@ const initializeSocket = (server) => {
     io.on('connection', async (socket) => {
         console.log("🚀 User connected to socket id : ", socket.id);
 
-        // Make sure `socket.user` exists before calling updateSocketID
         socket.join(socket.user?.id);
-
 
         if (socket.user) {
             await updateSocketID(socket.user, socket.id);
+            io.emit('user_online', socket.user); // Emit online status
         } else {
             console.error('User information not available on socket.');
         }
@@ -86,16 +85,21 @@ const initializeSocket = (server) => {
             }
         });
 
-        socket.on('disconnect', () => {
+        socket.on('disconnect', async () => {
+            if (socket.user) {
+                await updateUsersOnlineStatus(socket.user);
+                io.emit('user_offline', socket.user); // Emit offline status
+            }
             console.log('User disconnected:', socket.id);
         });
+        
     });
 };
 
 async function updateSocketID(user, socketId) {
     try {
         const [updated] = await User.update(
-            { socketId: socketId },
+            { socketId: socketId, isOnline: true },
             { where: { id: user.id } }
         );
 
@@ -107,6 +111,24 @@ async function updateSocketID(user, socketId) {
     } catch (error) {
         console.error('Error updating socketId:', error);
         throw new Error('Failed to update socketId');
+    }
+}
+
+async function updateUsersOnlineStatus(user) {
+    try {
+        const [updated] = await User.update(
+            { isOnline: false },
+            { where: { id: user.id } }
+        );
+
+        if (updated) {
+            console.log(`User's online status updated successfully for user ID: ${user.id}`);
+        } else {
+            console.log(`User with id ${user.id} not found.`);
+        }
+    } catch (error) {
+        console.error('Error updating online status:', error);
+        throw new Error('Failed to update online status');
     }
 }
 
