@@ -92,7 +92,7 @@ class MessageController {
             const message = await Message.findByPk(getId);
 
             if (message) {
-                response.json(message);
+                response.status(200).json(message);
             } else {
                 response.status(404).json({ message: 'Message not found' });
             }
@@ -152,8 +152,20 @@ async function createMessage(data) {
     }
 }
 
+const getSocketID = async (recieverId) => {
+    try {
+        const user = await User.findByPk(recieverId, {
+            attributes: ['socketId'],
+        });
+        return user ? user.socketId : null;
+    } catch (error) {
+        console.error('Error fetching socket ID:', error);
+        return null;
+    }
+};
+
 module.exports = {
-    
     MessageController,
-    createMessage
+    createMessage,
+    getSocketID
 };

@@ -1,10 +1,10 @@
 const socketIo = require('socket.io');
-const Message = require('../models/message');
-const { createMessage } = require('../controllers/messagesController');
-const User = require('../models/users');
 const jwt = require('jsonwebtoken');
-require('dotenv').config();
+const Message = require('../models/message');
+const User = require('../models/users');
+const { createMessage, getSocketID } = require('../controllers/messagesController');
 
+require('dotenv').config();
 
 const initializeSocket = (server) => {
     const io = socketIo(server, {
@@ -53,8 +53,6 @@ const initializeSocket = (server) => {
 
         socket.on('private message', async (data) => {
             try {
-                const message = data.message;
-
                 // Assuming `createMessage` returns the new message and receiver's socketId
                 const { newMessage, socketId } = await createMessage(data);
 
@@ -63,7 +61,7 @@ const initializeSocket = (server) => {
                 if (socketId) {
                     // Emit the message to the receiver's socketId
                     io.to(socketId).emit('private message', {
-                       newMessage
+                        newMessage
                     });
                 } else {
                     console.error('Receiver socketId not found.');
@@ -74,6 +72,29 @@ const initializeSocket = (server) => {
                 socket.emit('error', { message: 'Failed to send message' });
             }
         });
+
+
+
+        socket.on('typing', async (data) => {
+            console.log("Received typing event data:", data);
+            const socketId = await getSocketID(data.recieverId);
+            if (socketId) {
+                io.to(socketId).emit('typing', data);
+            } else {
+                console.error('No socket ID found for receiver:', data.recieverId);
+            }
+        });
+        
+        socket.on('stopTyping', async (data) => {
+            const socketId = await getSocketID(data.recieverId);
+            if (socketId) {
+                io.to(socketId).emit('stopTyping', data);
+            } else {
+                console.error('No socket ID found for receiver:', data.recieverId);
+            }
+        });
+        
+        
 
         socket.on('delete_message', async (messageId) => {
             try {
@@ -92,7 +113,7 @@ const initializeSocket = (server) => {
             }
             console.log('User disconnected:', socket.id);
         });
-        
+
     });
 };
 

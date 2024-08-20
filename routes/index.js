@@ -11,8 +11,8 @@ const authGuard = require('../middleware/authMiddleware');
 const router = express.Router();
 
 // Public routes (no authentication required)
-router.use('api/login', loginRoutes);
-router.use('api/registration', registrationRoutes);
+router.use('/auth/login', loginRoutes);
+router.use('/auth/signup', registrationRoutes);
 
 // Protected routes (authentication required)
 router.use('/api/contact-users', authGuard, userRouter);
