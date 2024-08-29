@@ -1,40 +1,39 @@
-const Sequelize = require('sequelize');
+const { DataTypes } = require('sequelize');
 const sequelize = require('../config/sequelize');
 const Role = require('./roles');
 
-// Define the User model
 const User = sequelize.define('User', {
   id: {
-    type: Sequelize.INTEGER,
+    type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true
   },
   username: {
-    type: Sequelize.STRING,
+    type: DataTypes.STRING,
     allowNull: true
   },
   mobile: {
-    type: Sequelize.STRING,
+    type: DataTypes.STRING,
     allowNull: false
   },
   firstName: {
-    type: Sequelize.STRING,
+    type: DataTypes.STRING,
     allowNull: false
   },
   lastName: {
-    type: Sequelize.STRING,
+    type: DataTypes.STRING,
     allowNull: false
   },
   email: {
-    type: Sequelize.STRING,
+    type: DataTypes.STRING,
     allowNull: false
   },
   password: {
-    type: Sequelize.STRING,
+    type: DataTypes.STRING,
     allowNull: false
   },
   roleId: {
-    type: Sequelize.INTEGER,
+    type: DataTypes.INTEGER,
     allowNull: true,
     references: {
       model: 'Roles',
@@ -44,17 +43,19 @@ const User = sequelize.define('User', {
     onDelete: 'CASCADE'
   },
   socketId: {
-    type: Sequelize.STRING,
+    type: DataTypes.STRING,
     allowNull: true
   },
   isOnline: {
-    type: Sequelize.BOOLEAN,
+    type: DataTypes.BOOLEAN,
     allowNull: false,
     defaultValue: false
   }
+}, {
+  tableName: 'Users',
+  timestamps: true
 });
 
-// Define the association with Role
 User.belongsTo(Role, { foreignKey: 'roleId' });
 
 module.exports = User;

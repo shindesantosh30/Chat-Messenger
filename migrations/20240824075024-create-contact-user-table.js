@@ -2,17 +2,14 @@
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('Messages', {
+    await queryInterface.createTable('ContactUsers', {
       id: {
         type: Sequelize.INTEGER,
         primaryKey: true,
-        autoIncrement: true
-      },
-      message: {
-        type: Sequelize.TEXT,
+        autoIncrement: true,
         allowNull: false
       },
-      senderId: {
+      userId: {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: {
@@ -22,7 +19,7 @@ module.exports = {
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE'
       },
-      receiverId: {
+      contactId: {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: {
@@ -46,6 +43,6 @@ module.exports = {
   },
 
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable('Messages');
+    await queryInterface.dropTable('ContactUsers');
   }
 };

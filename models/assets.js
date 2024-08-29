@@ -24,9 +24,8 @@ const Asset = sequelize.define('Asset', {
         allowNull: false
     }
 }, {
-    tableName: 'assets',
+    tableName: 'Assets',
     timestamps: true,
-    underscored: true
 });
 
 module.exports = Asset;

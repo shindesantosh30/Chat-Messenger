@@ -4,52 +4,67 @@ const multer = require('multer');
 const Asset = require('../models/assets');
 
 
-// Define storage options for multer
 const storage = multer.diskStorage({
-  destination: function (request, file, cb) {
-    // Set the destination folder for uploaded files
+  destination: function (req, file, cb) {
     const uploadPath = path.join(__dirname, '../media/static/');
     if (!fs.existsSync(uploadPath)) {
       fs.mkdirSync(uploadPath, { recursive: true });
     }
     cb(null, uploadPath);
   },
-  filename: function (request, file, cb) {
-    // Set the file name
+  filename: function (req, file, cb) {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
     cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
   }
 });
 
-// Create multer instance with storage options
 const upload = multer({ storage: storage });
 
-exports.uploadFile = (request, response) => {
-  // Use multer to handle the file upload
-  upload.single('file')(request, response, async function (err) {
+exports.uploadFile = (req, res) => {
+  upload.single('file')(req, res, async function (err) {
     if (err) {
-      return response.status(500).json({ error: err.message });
+      return res.status(500).json({ error: err.message });
     }
 
-    // Extract file details
-    const { originalname, path: filePath, size, mimetype } = request.file;
+    if (!req.file) {
+      return res.status(400).json({ message: "Attachment is required" });
+    }
+
+    const { originalname, path: absolutePath, size, mimetype } = req.file;
+    const relativePath = path.relative(process.cwd(), absolutePath);
+    const fullUrl = `${req.protocol}://${req.get('host')}`;
 
     try {
       const fileInstance = await Asset.create({
         fileName: originalname,
-        filePath: filePath,
+        filePath: relativePath,
         fileSize: size,
         mimeType: mimetype
       });
 
-      response.status(200).json({
+      res.status(200).json({
         message: 'File uploaded successfully',
         id: fileInstance.id,
-        fileName: fileInstance.fileName,
+        filePath: relativePath,
+        fileSize: formatFileSize(size),
+        fileName: originalname,
+        mimeType: mimetype,
         status_code: 200
       });
     } catch (dbError) {
-      response.status(500).json({ error: dbError.message });
+      console.log("Error uploading file: ", dbError);
+      res.status(500).json({ error: dbError.message });
     }
   });
+};
+
+const formatFileSize = (bytes) => {
+  const BYTES_IN_KB = 1024;
+  const BYTES_IN_MB = 1048576;
+  const BYTES_IN_GB = 1073741824;
+  if (bytes < BYTES_IN_KB) { return `${bytes} Bytes`; }
+  if (bytes < BYTES_IN_MB) { return `${(bytes / BYTES_IN_KB).toFixed(2)} KB`; }
+  if (bytes < BYTES_IN_GB) { return `${(bytes / BYTES_IN_MB).toFixed(2)} MB`; }
+
+  return `${(bytes / BYTES_IN_GB).toFixed(2)} GB`;
 };

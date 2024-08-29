@@ -1,60 +1,60 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/sequelize');
+const User = require('./users');
+const Asset = require('./assets');
 
 const Message = sequelize.define('Message', {
   message: {
     type: DataTypes.TEXT,
-    allowNull: false
+    allowNull: true,
   },
   senderId: {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
-      model: 'User',
-      key: 'id'
-    }
+      model: 'Users',
+      key: 'id',
+    },
   },
   receiverId: {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
-      model: 'User',
-      key: 'id'
-    }
+      model: 'Users',
+      key: 'id',
+    },
   },
   isEdited: {
     type: DataTypes.BOOLEAN,
     allowNull: false,
-    defaultValue: false
+    defaultValue: false,
   },
   isSeen: {
     type: DataTypes.BOOLEAN,
     allowNull: false,
-    defaultValue: false
+    defaultValue: false,
   },
   isDeleted: {
     type: DataTypes.BOOLEAN,
     allowNull: false,
-    defaultValue: false
+    defaultValue: false,
   },
-  attachment: {
+  attachmentId: {
     type: DataTypes.INTEGER,
     allowNull: true,
     references: {
       model: 'Assets',
-      key: 'id'
-    }
-  }
+      key: 'id',
+    },
+  },
 }, {
-  modelName: 'Messages',
-  // Other options can be specified here, such as tableName, timestamps, etc.
+  tableName: 'Messages',
+  timestamps: true,
 });
 
-// Define associations
-Message.associate = function (models) {
-  Message.belongsTo(models.User, { foreignKey: 'senderId', as: 'sender' });
-  Message.belongsTo(models.User, { foreignKey: 'receiverId', as: 'receiver' });
-  Message.belongsTo(models.Asset, { foreignKey: 'attachmentId', as: 'attachment' });
-};
+// Associations
+Message.belongsTo(User, { foreignKey: 'senderId', as: 'sender' });
+Message.belongsTo(User, { foreignKey: 'receiverId', as: 'receiver' });
+Message.belongsTo(Asset, { foreignKey: 'attachmentId', as: 'attachment' }); // Use the renamed field
 
 module.exports = Message;

@@ -1,6 +1,7 @@
 const { Op } = require('sequelize');
 const Message = require('../models/message');
 const User = require('../models/users');
+const Asset = require('../models/assets');
 
 
 class MessageController {
@@ -41,33 +42,11 @@ class MessageController {
         }
     }
 
-    // static async list(request, response) {
-    //     try {
-    //         const { sender, receiver } = request.query;
-
-    //         // Fetch messages where senderId matches sender and receiverId matches receiver, or vice versa
-    //         const messages = await Message.findAll({
-    //             where: {
-    //                 [Op.or]: [
-    //                     { senderId: sender, receiverId: receiver },
-    //                     { senderId: receiver, receiverId: sender }
-    //                 ]
-    //             },
-    //             order: [['createdAt', 'ASC']]
-    //         });
-
-    //         response.json(messages);
-    //     } catch (error) {
-    //         console.error(error);
-    //         response.status(500).json({ message: 'Internal server error' });
-    //     }
-    // }
-
     static async list(request, response) {
         try {
             const { sender, receiver } = request.query;
 
-            // Fetch messages where senderId matches sender and receiverId matches receiver, or vice versa
+            // Fetch messages with attachment data
             const messages = await Message.findAll({
                 where: {
                     [Op.or]: [
@@ -75,12 +54,24 @@ class MessageController {
                         { senderId: receiver, receiverId: sender }
                     ]
                 },
+                include: [
+                    {
+                        model: Asset,
+                        as: 'attachment',
+                        attributes: ['id', 'fileName', 'filePath', 'fileSize', 'mimeType']
+                    }
+                ],
                 order: [['createdAt', 'ASC']]
             });
-            messages['code'] = 200
+
+            // Add a response code to the messages object
+            messages['code'] = 200;
+
+            console.log("🚀 MESSAGES : ", messages);
+
             response.status(200).json(messages);
         } catch (error) {
-            // console.error(error);
+            console.error(error);
             response.status(500).json({ message: 'Internal server error' });
         }
     }
@@ -127,27 +118,46 @@ class MessageController {
 
 async function createMessage(data) {
     try {
-        console.log('Creating message with data:', data);
-
         const newMessage = await Message.create({
             senderId: data.message.senderId,
             receiverId: data.message.receiverId,
             message: data.message.message,
             createdAt: data.message.createdAt,
+            attachmentId: data.message.attachmentId,
         });
 
-        console.log('Message send successfully:', newMessage);
-
-        const receiver = await User.findByPk(data.message.receiverId, {
+        const user = await User.findByPk(data.message.receiverId, {
             attributes: ['socketId']
         });
 
-        const socketId = receiver ? receiver.socketId : null;
+        const socketId = user ? user.socketId : null;
 
+        console.log('👍Message created successfully');
         return { newMessage, socketId };
 
     } catch (error) {
         console.error('Error in createMessage:', error);
+        throw new Error('Unable to create messages');
+    }
+}
+
+async function deleteMessage(messageId) {
+    const instance = await Message.findByPk(messageId, {
+        attributes: ['senderId', 'receiverId']
+    });
+    if (!instance) {
+        throw new Error('Message not found');
+    }
+    await instance.destroy();
+    return instance;
+}
+
+
+async function getUserSocketId(userId) {
+    try {
+        const receiver = await User.findByPk(userId, { attributes: ['socketId'] });
+        return socketId || null;
+    } catch (error) {
         throw new Error('Unable to create messages');
     }
 }
@@ -167,5 +177,6 @@ const getSocketID = async (recieverId) => {
 module.exports = {
     MessageController,
     createMessage,
-    getSocketID
+    getSocketID,
+    deleteMessage
 };

@@ -1,6 +1,7 @@
 const express = require('express');
 const http = require('http');
 const cors = require('cors');
+const path = require('path');
 
 const initializeSocket = require('./controllers/socket')
 const routes = require('./routes/index')
@@ -16,6 +17,8 @@ app.use(cors({
 
 app.use(express.json());
 app.use(express.static('public'));
+
+app.use('/media/static', express.static(path.join(__dirname, 'media/static')));
 
 app.use(routes)
 

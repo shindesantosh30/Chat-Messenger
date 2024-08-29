@@ -1,44 +1,50 @@
-// Import Sequelize
-const Sequelize = require('sequelize');
+const { DataTypes } = require('sequelize');
 const sequelize = require('../config/sequelize');
+const User = require('./users');
 
-
-const ContactUsers = sequelize.define('ContactUsers', {
+const ContactUsers = sequelize.define('ContactUser', {
     id: {
-        type: Sequelize.INTEGER,
+        type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true
     },
     userId: {
-        type: Sequelize.INTEGER,
+        type: DataTypes.INTEGER,
         allowNull: false,
         references: {
-            model: 'User',
+            model: 'Users',
             key: 'id'
         },
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE'
     },
     contactId: {
-        type: Sequelize.INTEGER,
+        type: DataTypes.INTEGER,
         allowNull: false,
         references: {
-            model: 'User',
+            model: 'Users',
             key: 'id'
         },
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE'
     },
     createdAt: {
-        type: Sequelize.DATE,
+        type: DataTypes.DATE,
         allowNull: false,
-        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
+        defaultValue: DataTypes.literal('CURRENT_TIMESTAMP')
     },
     updatedAt: {
-        type: Sequelize.DATE,
+        type: DataTypes.DATE,
         allowNull: false,
-        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
+        defaultValue: DataTypes.literal('CURRENT_TIMESTAMP')
     }
+}, {
+    tableName: 'ContactUsers',
+    timestamps: true,
 });
+
+// Define associations
+ContactUsers.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+ContactUsers.belongsTo(User, { foreignKey: 'contactId', as: 'contact' });
 
 module.exports = ContactUsers;
