@@ -6,7 +6,8 @@ module.exports = {
       id: {
         type: Sequelize.INTEGER,
         primaryKey: true,
-        autoIncrement: true
+        autoIncrement: true,
+        allowNull: false
       },
       username: {
         type: Sequelize.STRING,
@@ -34,7 +35,7 @@ module.exports = {
       },
       roleId: {
         type: Sequelize.INTEGER,
-        allowNull: false,
+        allowNull: true,
         references: {
           model: 'Roles',
           key: 'id'
@@ -42,34 +43,29 @@ module.exports = {
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE'
       },
-      createdAt: {
+      socketId: {
+        type: Sequelize.STRING,
+        allowNull: true
+      },
+      isOnline: {
+        type: Sequelize.BOOLEAN,
         allowNull: false,
-        type: Sequelize.DATE
+        defaultValue: false
+      },
+      createdAt: {
+        type: Sequelize.DATE,
+        allowNull: false,
+        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
       },
       updatedAt: {
+        type: Sequelize.DATE,
         allowNull: false,
-        type: Sequelize.DATE
+        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP')
       }
-    });
-    
-    // Add foreign key constraint
-    await queryInterface.addConstraint('Users', {
-      fields: ['roleId'],
-      type: 'foreign key',
-      name: 'fk_user_role_id',
-      references: {
-        table: 'Roles',
-        field: 'id'
-      },
-      onUpdate: 'CASCADE',
-      onDelete: 'CASCADE'
     });
   },
 
   down: async (queryInterface, Sequelize) => {
-    // Remove foreign key constraint
-    await queryInterface.removeConstraint('Users', 'fk_user_role_id');
-    // Drop the table
     await queryInterface.dropTable('Users');
   }
 };

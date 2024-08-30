@@ -1,8 +1,10 @@
 const express = require('express');
-const { list } = require('../controllers/userController');
+const { UserController } = require('../controllers/userController');
 
 const router = express.Router();
 
-router.get('/', list);
+router.get('/', UserController.list);
+
+router.get('/:id', UserController.retrieve);
 
 module.exports = router;

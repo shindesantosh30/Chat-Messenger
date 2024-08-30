@@ -1,6 +1,7 @@
 const Sequelize = require('sequelize');
 const sequelize = require('../config/sequelize');
 
+
 // Define the Role model
 const Role = sequelize.define('Role', {
   id: {
@@ -8,10 +9,15 @@ const Role = sequelize.define('Role', {
     primaryKey: true,
     autoIncrement: true
   },
-  roleName: {
+  role_name: {
     type: Sequelize.STRING,
     allowNull: false
   }
-});
+},
+  {
+    tableName: 'Roles',
+    timestamps: false
+  }
+);
 
 module.exports = Role;

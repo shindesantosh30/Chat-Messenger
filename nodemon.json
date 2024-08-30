@@ -1,0 +1,11 @@
+{
+    "watch": [
+        "."
+    ],
+    "ext": "js,json",
+    "ignore": [
+        "*.test.js",
+        ".git",
+        "node_modules"
+    ]
+}

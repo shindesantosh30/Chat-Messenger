@@ -1,8 +1,10 @@
 const socketIo = require('socket.io');
-const Message = require('../models/message');
-const { createMessage } = require('../controllers/messagesController');
-const User = require('../models/users');
 const jwt = require('jsonwebtoken');
+const Message = require('../models/message');
+const User = require('../models/users');
+const { createMessage, getSocketID, deleteMessage } = require('../controllers/messagesController');
+const { updateSocketID, updateUsersOnlineStatus } = require('../controllers/userController')
+
 require('dotenv').config();
 
 
@@ -21,16 +23,13 @@ const initializeSocket = (server) => {
             if (!token || !token.startsWith('Bearer ')) {
                 return next(new Error('Authentication credentials were not provided.'));
             }
-            const jwtSecret = process.env.JWT_SECRET || 'authToken';
-
             const authToken = token.split(' ')[1];
-            const decoded = jwt.verify(authToken, jwtSecret);
+            const decoded = jwt.verify(authToken, process.env.JWT_SECRET);
 
             const user = await User.findByPk(decoded.userId);
             if (!user) {
-                return next(new Error('Invalid user.'));
+                return next(new Error('User not found'));
             }
-            // Attach user to socket for future use
             socket.user = user;
             next();
         } catch (error) {
@@ -40,74 +39,69 @@ const initializeSocket = (server) => {
     });
 
     io.on('connection', async (socket) => {
-        console.log("🚀 User connected to socket id : ", socket.id);
+        console.log("🚀 User connected to socket : ", socket.id);
+        let user = await socket.user;
+        socket.join(user?.id);
 
-        // Make sure `socket.user` exists before calling updateSocketID
-        socket.join(socket.user?.id);
+        if (user) { await updateSocketID(user, socket.id); io.emit('user_online', user); }
+        else { console.error('User information not available on socket.'); }
 
 
-        if (socket.user) {
-            await updateSocketID(socket.user, socket.id);
-        } else {
-            console.error('User information not available on socket.');
-        }
-
-        socket.on('private message', async (data) => {
+        socket.on('private message', async (messageData) => {
             try {
-                const message = data.message;
-
-                // Assuming `createMessage` returns the new message and receiver's socketId
-                const { newMessage, socketId } = await createMessage(data);
-
-                console.log("🚀 Recipient Socket ID:", socketId);
-
+                const { newMessage, socketId } = await createMessage(messageData);
                 if (socketId) {
-                    // Emit the message to the receiver's socketId
-                    io.to(socketId).emit('private message', {
-                       newMessage
-                    });
+                    io.to(socketId).emit('private message', newMessage);
                 } else {
-                    console.error('Receiver socketId not found.');
-                    socket.emit('error', { message: 'Receiver not available' });
+                    console.log('🚫 No socket ID found for the receiver.');
                 }
+                socket.emit('private message', newMessage);
             } catch (error) {
-                console.error('Error handling private message:', error);
+                console.error('Error while sending private message:', error);
                 socket.emit('error', { message: 'Failed to send message' });
+            }
+        });
+
+        socket.on('typing', async (data) => {
+            const socketId = await getSocketID(data.recieverId);
+            if (socketId) {
+                io.to(socketId).emit('typing', data);
+            } else {
+                console.error('No socket ID found for receiver:', data.recieverId);
+            }
+        });
+
+        socket.on('stopTyping', async (data) => {
+            const socketId = await getSocketID(data.recieverId);
+            if (socketId) {
+                io.to(socketId).emit('stopTyping', data);
+            } else {
+                console.error('No socket ID found for receiver:', data.recieverId);
             }
         });
 
         socket.on('delete_message', async (messageId) => {
             try {
-                await Message.destroy({ where: { id: messageId } });
-                io.emit('message_deleted', { messageId });
+                instance = await deleteMessage(messageId)
+                
+                io.to(socketId).emit('message_deleted', messageId)
+
+                socket.emit('message_deleted', { messageId });
             } catch (error) {
                 console.error('Error deleting message:', error);
                 socket.emit('error', { message: 'Failed to delete message' });
             }
         });
 
-        socket.on('disconnect', () => {
-            console.log('User disconnected:', socket.id);
+        socket.on('disconnect', async () => {
+            if (socket.user) {
+                await updateUsersOnlineStatus(socket.user);
+                io.emit('user_offline', socket.user); // Emit offline status
+            }
+            console.log('👋 User disconnected:', socket.id);
         });
     });
 };
 
-async function updateSocketID(user, socketId) {
-    try {
-        const [updated] = await User.update(
-            { socketId: socketId },
-            { where: { id: user.id } }
-        );
-
-        if (updated) {
-            console.log(`User's socketId updated successfully: ${socketId}`);
-        } else {
-            console.log(`User with id ${user.id} not found.`);
-        }
-    } catch (error) {
-        console.error('Error updating socketId:', error);
-        throw new Error('Failed to update socketId');
-    }
-}
 
 module.exports = initializeSocket;
