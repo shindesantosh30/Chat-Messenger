@@ -2,7 +2,7 @@ const socketIo = require('socket.io');
 const jwt = require('jsonwebtoken');
 const Message = require('../models/message');
 const User = require('../models/users');
-const { createMessage, getSocketID, deleteMessage } = require('../controllers/messagesController');
+const { createMessage, getSocketID, deleteMessage, getUserSocketId } = require('../controllers/messagesController');
 const { updateSocketID, updateUsersOnlineStatus } = require('../controllers/userController')
 
 require('dotenv').config();
@@ -83,10 +83,15 @@ const initializeSocket = (server) => {
         socket.on('delete_message', async (messageId) => {
             try {
                 instance = await deleteMessage(messageId)
-                
-                io.to(socketId).emit('message_deleted', messageId)
+                let userId = await socket.user.id;
 
-                socket.emit('message_deleted', { messageId });
+                if (userId == instance.senderId) { var socketId = await getUserSocketId(instance.receiverId); }
+                else { var socketId = await getUserSocketId(instance.senderId); }
+                console.log("Socket Id : ", socketId);
+
+                io.to(socketId).emit('delete_message', messageId)
+
+                socket.emit('delete_message', { messageId });
             } catch (error) {
                 console.error('Error deleting message:', error);
                 socket.emit('error', { message: 'Failed to delete message' });

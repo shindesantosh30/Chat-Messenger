@@ -143,22 +143,23 @@ async function createMessage(data) {
 
 async function deleteMessage(messageId) {
     const instance = await Message.findByPk(messageId, {
-        attributes: ['senderId', 'receiverId']
+        attributes: ['id', 'senderId', 'receiverId']
     });
-    if (!instance) {
-        throw new Error('Message not found');
-    }
+
+    if (!instance) { throw new Error('Message not found'); }
+
     await instance.destroy();
     return instance;
 }
 
-
 async function getUserSocketId(userId) {
     try {
         const receiver = await User.findByPk(userId, { attributes: ['socketId'] });
-        return socketId || null;
+
+        return receiver ? receiver.socketId : null;
+    
     } catch (error) {
-        throw new Error('Unable to create messages');
+        throw new Error('Unable to retrieve socketId for user');
     }
 }
 
@@ -178,5 +179,6 @@ module.exports = {
     MessageController,
     createMessage,
     getSocketID,
-    deleteMessage
+    deleteMessage,
+    getUserSocketId
 };
