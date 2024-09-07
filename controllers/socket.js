@@ -1,8 +1,7 @@
 const socketIo = require('socket.io');
 const jwt = require('jsonwebtoken');
-const Message = require('../models/message');
 const User = require('../models/users');
-const { createMessage, getSocketID, deleteMessage, getUserSocketId } = require('../controllers/messagesController');
+const { createMessage, updateMessage, getSocketID, deleteMessage, getUserSocketId } = require('../controllers/messagesController');
 const { updateSocketID, updateUsersOnlineStatus } = require('../controllers/userController')
 
 require('dotenv').config();
@@ -43,19 +42,18 @@ const initializeSocket = (server) => {
         let user = await socket.user;
         socket.join(user?.id);
 
-        if (user) { await updateSocketID(user, socket.id); io.emit('user_online', user); }
+        if (user) { await updateSocketID(user.id, socket.id); io.emit('user_online', user); }
         else { console.error('User information not available on socket.'); }
-
 
         socket.on('private message', async (messageData) => {
             try {
-                const { newMessage, socketId } = await createMessage(messageData);
+                const { messageInstance, socketId } = await createMessage(messageData);
                 if (socketId) {
-                    io.to(socketId).emit('private message', newMessage);
+                    io.to(socketId).emit('private message', messageInstance);
                 } else {
                     console.log('🚫 No socket ID found for the receiver.');
                 }
-                socket.emit('private message', newMessage);
+                socket.emit('private message', messageInstance);
             } catch (error) {
                 console.error('Error while sending private message:', error);
                 socket.emit('error', { message: 'Failed to send message' });
@@ -98,10 +96,24 @@ const initializeSocket = (server) => {
             }
         });
 
+        socket.on('modify message', async (messageData) => {
+            try {
+                let userId = socket.user.id;
+                const { updatedMessageInstance, socketId } = await updateMessage(messageData, userId);
+                if (socketId) {
+                    io.to(socketId).emit('modify message', updatedMessageInstance);
+                }
+                socket.emit('modify message', updatedMessageInstance);
+            } catch (error) {
+                console.error('Error while sending modify message:', error);
+                socket.emit('error', { message: 'Failed to send message' });
+            }
+        });
+
         socket.on('disconnect', async () => {
             if (socket.user) {
                 await updateUsersOnlineStatus(socket.user);
-                io.emit('user_offline', socket.user); // Emit offline status
+                io.emit('user_offline', socket.user);
             }
             console.log('👋 User disconnected:', socket.id);
         });

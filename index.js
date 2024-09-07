@@ -2,12 +2,15 @@ const express = require('express');
 const http = require('http');
 const cors = require('cors');
 const path = require('path');
+const compression = require('compression');
 
-const initializeSocket = require('./controllers/socket')
-const routes = require('./routes/index')
+const initializeSocket = require('./controllers/socket');
+const routes = require('./routes/index');
 
 const app = express();
 const server = http.createServer(app);
+
+app.use(compression());
 
 app.use(cors({
     origin: "http://localhost:4200",
@@ -16,11 +19,15 @@ app.use(cors({
 })); 
 
 app.use(express.json());
-app.use(express.static('public'));
 
+// Serve static files with compression
 app.use('/media/static', express.static(path.join(__dirname, 'media/static')));
 
-app.use(routes)
+app.get('/', (req, res) => {
+    res.send('Server is working!');
+});
+
+app.use(routes);
 
 initializeSocket(server);
 
@@ -28,4 +35,3 @@ const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}\nAccess it at: http://127.0.0.1:${PORT}/`);
 });
-

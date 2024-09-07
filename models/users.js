@@ -50,6 +50,10 @@ const User = sequelize.define('User', {
     type: DataTypes.BOOLEAN,
     allowNull: false,
     defaultValue: false
+  },
+  lastSeen: {
+    type: DataTypes.DATE,
+    allowNull: true,
   }
 }, {
   tableName: 'Users',

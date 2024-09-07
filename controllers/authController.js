@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/users');
@@ -62,7 +64,7 @@ class LoginController {
                 return response.status(400).json({ message: 'The password you entered is incorrect. Please try again.' });
             }
             // Generate JWT token
-            const token = jwt.sign({ userId: user.id }, 'access_token', { expiresIn: '8h' });
+            const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '8h' });
 
             response.status(200).json({ "status_code": 200, token, user: { id: user.id, email: user.email, name: `${user.firstName} ${user.lastName}` } });
 

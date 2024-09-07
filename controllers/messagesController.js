@@ -2,7 +2,7 @@ const { Op } = require('sequelize');
 const Message = require('../models/message');
 const User = require('../models/users');
 const Asset = require('../models/assets');
-
+const { removeFile } = require('../controllers/fileUploadController')
 
 class MessageController {
 
@@ -67,8 +67,6 @@ class MessageController {
             // Add a response code to the messages object
             messages['code'] = 200;
 
-            console.log("🚀 MESSAGES : ", messages);
-
             response.status(200).json(messages);
         } catch (error) {
             console.error(error);
@@ -118,7 +116,7 @@ class MessageController {
 
 async function createMessage(data) {
     try {
-        const newMessage = await Message.create({
+        let messageInstance = await Message.create({
             senderId: data.message.senderId,
             receiverId: data.message.receiverId,
             message: data.message.message,
@@ -126,14 +124,18 @@ async function createMessage(data) {
             attachmentId: data.message.attachmentId,
         });
 
-        const user = await User.findByPk(data.message.receiverId, {
-            attributes: ['socketId']
-        });
+        if (data.message.attachmentId) {
+            const attachment = await Asset.findByPk(data.message.attachmentId, {
+                attributes: ['id', 'fileName', 'filePath', 'fileSize', 'mimeType']
+            });
+            messageInstance = messageInstance.toJSON()
+            messageInstance.attachment = attachment;
+        }
 
+        const user = await User.findByPk(data.message.receiverId, { attributes: ['socketId'] });
         const socketId = user ? user.socketId : null;
 
-        console.log('👍Message created successfully');
-        return { newMessage, socketId };
+        return { messageInstance, socketId };
 
     } catch (error) {
         console.error('Error in createMessage:', error);
@@ -141,14 +143,45 @@ async function createMessage(data) {
     }
 }
 
+async function updateMessage(message, userId) {
+    try {
+        const { id, message: newMessage, senderId, receiverId } = message;
+
+        const [updateCount] = await Message.update(
+            {
+                message: newMessage,
+                isEdited: true
+            },
+            {
+                where: { id: id }
+            }
+        );
+
+        const updatedMessageInstance = await Message.findByPk(id);
+
+        const receiverUserId = (userId === senderId) ? receiverId : userId;
+
+        const user = await User.findByPk(receiverUserId, { attributes: ['socketId'] });
+        const socketId = user ? user.socketId : null;
+
+        return { updatedMessageInstance, socketId };
+
+    } catch (error) {
+        console.error('Unable to update message:', error);
+        throw new Error('Unable to update message');
+    }
+}
+
 async function deleteMessage(messageId) {
     const instance = await Message.findByPk(messageId, {
         attributes: ['id', 'senderId', 'receiverId']
     });
-
     if (!instance) { throw new Error('Message not found'); }
 
-    await instance.destroy();
+    if (instance?.attachmentId) {
+        await removeFile(instance.attachmentId)
+    }
+    instance.destroy();
     return instance;
 }
 
@@ -157,7 +190,7 @@ async function getUserSocketId(userId) {
         const receiver = await User.findByPk(userId, { attributes: ['socketId'] });
 
         return receiver ? receiver.socketId : null;
-    
+
     } catch (error) {
         throw new Error('Unable to retrieve socketId for user');
     }
@@ -180,5 +213,6 @@ module.exports = {
     createMessage,
     getSocketID,
     deleteMessage,
-    getUserSocketId
+    getUserSocketId,
+    updateMessage
 };
