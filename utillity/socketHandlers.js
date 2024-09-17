@@ -4,6 +4,7 @@ const { createMessage, updateMessage, getSocketID, deleteMessage, getUserSocketI
 const { updateSocketID, updateUsersOnlineStatus } = require('../controllers/userController');
 require('dotenv').config();
 
+
 const authenticateSocket = async (socket, next) => {
     try {
         const token = socket.handshake.headers.authorization;
@@ -113,5 +114,16 @@ const handleDisconnect = async (socket, io) => {
         let updatedUser = await updateUsersOnlineStatus(socket.user);
         io.emit('user_offline', updatedUser);
     }
-    console.log('👋 User -- ' + socket.user?.firstName + '-- disconnected:', socket.id);
+    console.log('\n⛔User -- ' + socket.user?.firstName + ' disconnected: socket Id ', socket.id);
 };
+
+module.exports = {
+    authenticateSocket,
+    handleConnection,
+    handlePrivateMessage,
+    handleTyping,
+    handleStopTyping,
+    handleDeleteMessage,
+    handleModifyMessage,
+    handleDisconnect
+}

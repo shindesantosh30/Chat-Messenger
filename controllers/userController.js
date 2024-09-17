@@ -49,6 +49,7 @@ class UserController {
 
 async function updateSocketID(userId, socketId) {
     try {
+        console.log("Updating the isOnline status");
         await User.update({ socketId: socketId, isOnline: true }, { where: { id: userId } });
     } catch (error) {
         console.error('Error updating socketId:', error);
@@ -62,14 +63,24 @@ async function updateUsersOnlineStatus(user) {
             {
                 isOnline: false,
                 lastSeen: new Date(),
-             },
+            },
             { where: { id: user.id } }
         );
+
+        if (updated) {
+            const updatedUser = await User.findByPk(user.id, {
+                attributes: ['id', 'isOnline', 'lastSeen'],
+            });
+            return updatedUser;
+        } else {
+            throw new Error('User not found');
+        }
     } catch (error) {
         console.error('Error updating online status:', error);
         throw new Error('Failed to update online status');
     }
 }
+
 
 module.exports = {
     UserController,

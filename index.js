@@ -4,7 +4,7 @@ const cors = require('cors');
 const path = require('path');
 const compression = require('compression');
 
-const initializeSocket = require('./controllers/socket');
+const socketService = require('./controllers/socket');
 const routes = require('./routes/index');
 
 const app = express();
@@ -29,7 +29,7 @@ app.get('/', (req, res) => {
 
 app.use(routes);
 
-initializeSocket(server);
+socketService(server);
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
