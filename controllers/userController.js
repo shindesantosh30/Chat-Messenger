@@ -28,8 +28,6 @@ class UserController {
     static async retrieve(request, response) {
         try {
             const { id } = request.params;
-            console.log("PARAMS 🚀 ", id);
-
             const instance = await User.findByPk(id, {
                 attributes: { exclude: ['password', 'updatedAt'] }
             });
@@ -41,7 +39,7 @@ class UserController {
             return response.json(instance);
         } catch (error) {
             console.error('Error fetching user list:', error);
-            return response.status(500).json({ message: 'Internal server error' }); // Handle errors
+            return response.status(500).json({ message: 'Internal server error' });
         }
     }
 }
@@ -49,7 +47,6 @@ class UserController {
 
 async function updateSocketID(userId, socketId) {
     try {
-        console.log("Updating the isOnline status");
         await User.update({ socketId: socketId, isOnline: true }, { where: { id: userId } });
     } catch (error) {
         console.error('Error updating socketId:', error);

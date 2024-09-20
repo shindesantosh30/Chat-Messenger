@@ -23,15 +23,11 @@ app.use(express.json());
 // Serve static files with compression
 app.use('/media/static', express.static(path.join(__dirname, 'media/static')));
 
-app.get('/', (req, res) => {
-    res.send('Server is working!');
-});
-
 app.use(routes);
 
 socketService(server);
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}\nAccess it at: http://127.0.0.1:${PORT}/`);
+    console.log(`\n\x1b[32mServer is running on port\x1b[35m ${PORT}\x1b[0m\nAccess it at:\x1b[34m http://127.0.0.1:${PORT}/\x1b[0m\n`);
 });

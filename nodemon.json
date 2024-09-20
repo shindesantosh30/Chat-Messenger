@@ -7,5 +7,6 @@
         "*.test.js",
         ".git",
         "node_modules"
-    ]
+    ],
+    "quiet": true
 }

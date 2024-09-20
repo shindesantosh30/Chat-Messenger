@@ -9,7 +9,7 @@ const sequelize = new Sequelize(
   {
     host: process.env.DB_HOST,  // Host
     dialect: process.env.DB_DIALECT,  // Dialect
-    // logging: false
+    logging: false
   }
 );
 

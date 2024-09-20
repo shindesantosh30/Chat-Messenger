@@ -27,7 +27,7 @@ const authenticateSocket = async (socket, next) => {
 };
 
 const handleConnection = async (socket, io) => {
-    console.log("🚀 User " + socket.user?.firstName + " connected to socket : ", socket.id);
+    console.log(`\n\x1b[34m👦 User \x1b[35m\x1b[1m${socket.user?.firstName}\x1b[35m\x1b[0m connected\x1b[0m\x1b[33m to the socket Id: \x1b[36m${socket.id}\x1b[0m`);
     let user = await socket.user;
     socket.join(user?.id);
 
@@ -40,8 +40,6 @@ const handleConnection = async (socket, io) => {
             email: user.email,
             mobile: user.mobile
         });
-    } else {
-        console.error('User information not available on socket.');
     }
 };
 
@@ -51,7 +49,7 @@ const handlePrivateMessage = async (socket, io, messageData) => {
         if (socketId) {
             io.to(socketId).emit('private message', messageInstance);
         } else {
-            console.log('🚫 No socket ID found for the receiver.');
+            console.log(`\x1b[m31🚫 No socket ID found for the receiver.\x1b[0m`);
         }
         socket.emit('private message', messageInstance);
     } catch (error) {
@@ -110,11 +108,9 @@ const handleModifyMessage = async (socket, io, messageData) => {
 };
 
 const handleDisconnect = async (socket, io) => {
-    if (socket.user) {
-        let updatedUser = await updateUsersOnlineStatus(socket.user);
-        io.emit('user_offline', updatedUser);
-    }
-    console.log('\n⛔User -- ' + socket.user?.firstName + ' disconnected: socket Id ', socket.id);
+    let updatedUser = await updateUsersOnlineStatus(socket.user);
+    io.emit('user_offline', updatedUser);
+    console.log('\n\x1b[32⛔User -- ' + socket.user?.firstName + '\x1b[31 disconnected: socket Id ', socket.id, '\x1b[0m');
 };
 
 module.exports = {
