@@ -8,13 +8,18 @@ const User = sequelize.define('User', {
     primaryKey: true,
     autoIncrement: true
   },
+  googleId: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    unique: true
+  },
   username: {
     type: DataTypes.STRING,
     allowNull: true
   },
   mobile: {
     type: DataTypes.STRING,
-    allowNull: false
+    allowNull: true
   },
   firstName: {
     type: DataTypes.STRING,
@@ -26,11 +31,12 @@ const User = sequelize.define('User', {
   },
   email: {
     type: DataTypes.STRING,
-    allowNull: false
+    allowNull: false,
+    unique: true  // Email should be unique for all users
   },
   password: {
     type: DataTypes.STRING,
-    allowNull: false
+    allowNull: true  // Google OAuth users won't have a password
   },
   roleId: {
     type: DataTypes.INTEGER,
@@ -53,7 +59,7 @@ const User = sequelize.define('User', {
   },
   lastSeen: {
     type: DataTypes.DATE,
-    allowNull: true,
+    allowNull: true
   }
 }, {
   tableName: 'Users',

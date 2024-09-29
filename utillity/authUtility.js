@@ -2,7 +2,6 @@ require('dotenv').config();
 const nodemailer = require('nodemailer');
 const fs = require('fs');
 
-
 async function sendResetEmail(email, resetToken, request, subject, userName) {
 
     const baseUrl = `${request.protocol}://${request.get('host')}`;

@@ -3,6 +3,11 @@ const http = require('http');
 const cors = require('cors');
 const path = require('path');
 const compression = require('compression');
+const session = require('express-session');
+const passport = require('passport');
+
+require('dotenv').config();
+require('./config/passport_config');
 
 const socketService = require('./controllers/socket');
 const routes = require('./routes/index');
@@ -10,15 +15,24 @@ const routes = require('./routes/index');
 const app = express();
 const server = http.createServer(app);
 
+app.use(session({
+    secret: process.env.JWT_SECRET,
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: false }
+}));
+
 app.use(compression());
 
 app.use(cors({
     origin: "http://localhost:4200",
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     // credentials: true
-})); 
+}));
 
 app.use(express.json());
+app.use(passport.initialize());
+app.use(passport.session());
 
 // Serve static files with compression
 app.use('/media/static', express.static(path.join(__dirname, 'media/static')));

@@ -1,7 +1,6 @@
 const { getErrorMessage } = require('../utillity/utils');
 const User = require('../models/users');
 
-
 class ProfileController {
     static async updateProfile(request, response) {
         try {

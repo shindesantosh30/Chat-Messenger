@@ -1,10 +1,9 @@
 require('dotenv').config();
 
-const bcrypt = require('bcrypt');
+const { hash, compare } = require('bcrypt');
+const User = require('../models/users')
+const { responseBadRequest } = require('../utillity/api_response');
 const jwt = require('jsonwebtoken');
-const User = require('../models/users');
-const Role = require('../models/roles');
-const apiResponse = require('../utillity/api_response');
 
 
 class RegistrationController {
@@ -15,21 +14,20 @@ class RegistrationController {
             const { email, mobile, password, firstName, lastName, confirm_password } = user;
 
             if (!firstName || !lastName) {
-                return response.status(400).json(apiResponse.responseBadRequest("First and last name is required"));
+                return response.status(400).json(responseBadRequest("First and last name is required"));
             }
 
             if (!password) {
-                return response.status(400).json(apiResponse.responseBadRequest("Password is required"));
+                return response.status(400).json(responseBadRequest("Password is required"));
             }
 
             if (password !== confirm_password) {
-                return response.status(400).json(apiResponse.responseBadRequest("Password and confirm password must be same"));
+                return response.status(400).json(responseBadRequest("Password and confirm password must be same"));
             }
 
-            const hashedPassword = await bcrypt.hash(password, 10);
-            console.log("HERE");
+            const hashedPassword = await hash(password, 10);
 
-            const role = await Role.findByPk(2);
+            const role = await User.findByPk(2);
             if (!role) {
                 return response.status(404).json({ message: 'User role not found' });
             }
@@ -59,7 +57,7 @@ class LoginController {
             if (!user) {
                 return response.status(400).json({ message: 'User with this email is not registered' });
             }
-            const isPasswordValid = await bcrypt.compare(password, user.password);
+            const isPasswordValid = await compare(password, user.password);
             if (!isPasswordValid) {
                 return response.status(400).json({ message: 'The password you entered is incorrect. Please try again.' });
             }
