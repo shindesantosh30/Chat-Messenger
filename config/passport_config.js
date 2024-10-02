@@ -1,6 +1,7 @@
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const User = require('../models/users');
+const { UserSettings } = require('../models/userSettings')
 
 passport.use(new GoogleStrategy({
   clientID: process.env.GOOGLE_CLIENT_ID,
@@ -19,6 +20,7 @@ passport.use(new GoogleStrategy({
           lastName: profile.name.familyName,
           email: profile.emails[0].value
         });
+        UserSettings.create({ userId: user.id });
       }
 
       // Pass the user object to the done callback

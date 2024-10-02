@@ -39,6 +39,10 @@ class ApiResponse {
     responseNotAcceptable(message = "Not acceptable", code = 406, success = false, data = {}) {
         return { message, code, success, data };
     }
+
+    responseConflict(message = "Not acceptable", code = 409, success = false, data = {}) {
+        return { message, code, success, data };
+    }
 }
 
 module.exports = new ApiResponse();

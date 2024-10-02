@@ -1,9 +1,11 @@
 require('dotenv').config();
-
-const { hash, compare } = require('bcrypt');
-const User = require('../models/users')
-const { responseBadRequest } = require('../utillity/api_response');
 const jwt = require('jsonwebtoken');
+const { hash, compare } = require('bcrypt');
+
+const { responseBadRequest } = require('../utillity/api_response');
+const User = require('../models/users')
+const { UserSettings } = require('../models/userSettings');
+const Role = require('../models/roles');
 
 
 class RegistrationController {
@@ -25,15 +27,21 @@ class RegistrationController {
                 return response.status(400).json(responseBadRequest("Password and confirm password must be same"));
             }
 
+            if (await User.findOne({ where: { email } })) {
+                return response.status(400).json({ message: 'User already exists with this email' });
+            }
+
             const hashedPassword = await hash(password, 10);
 
-            const role = await User.findByPk(2);
+            const role = await Role.findByPk(2);
             if (!role) {
                 return response.status(404).json({ message: 'User role not found' });
             }
             const newUser = await User.create({
                 email, mobile, password: hashedPassword, firstName, lastName, roleId: role.id
             });
+            UserSettings.create({ userId: newUser.id });
+
             response.status(201).json({ status_code: 201, message: "Registration successfully" });
         } catch (error) {
             console.error('Exception ', error);

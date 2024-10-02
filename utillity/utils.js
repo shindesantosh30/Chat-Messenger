@@ -11,7 +11,7 @@ function getPaginationResponse(data, request) {
     const page = request.query.page || constant.PAGE_SIZE;
     // const limit = request.query.limit || constant.PAGE_LIMIT;
     // const page = request.query.page || 2000000;
-    const limit = request.query.limit || 2000000;
+    const limit = request.query.limit || 200;
 
     const startIndex = (page - 1) * limit;
     const endIndex = startIndex + limit;
