@@ -58,6 +58,11 @@ router.use('/api/contact-users', authGuard, async (req, res, next) => {
   userRouter(req, res, next);
 });
 
+router.use('/api/users', authGuard, async (req, res, next) => {
+  const userRouter = require('./userRoutes');
+  userRouter(req, res, next);
+});
+
 router.use('/api/message', authGuard, async (req, res, next) => {
   const messageRoutes = require('./messagesRoutes');
   messageRoutes(req, res, next);

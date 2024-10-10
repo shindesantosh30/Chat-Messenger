@@ -19,7 +19,10 @@ app.use(session({
     secret: process.env.JWT_SECRET,
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: false }
+    cookie: { 
+        secure: process.env.NODE_ENV === 'production',
+        httpOnly: true
+    }
 }));
 
 app.use(compression());
@@ -27,7 +30,7 @@ app.use(compression());
 app.use(cors({
     origin: "http://localhost:4200",
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
-    // credentials: true
+    // credentials: true        
 }));
 
 app.use(express.json());
@@ -36,6 +39,12 @@ app.use(passport.session());
 
 // Serve static files with compression
 app.use('/media/static', express.static(path.join(__dirname, 'media/static')));
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({ message: 'Something went wrong!' }); // Generic error message
+});
 
 app.use(routes);
 

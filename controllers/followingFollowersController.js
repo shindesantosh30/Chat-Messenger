@@ -136,10 +136,7 @@ class FollowersController {
             const transformData = queryset.map(transform);
             const data = getPaginationResponse(transformData, request);
 
-            return response.status(200).json({
-                status: 'success',
-                data: data
-            });
+            return response.status(200).json(data);
         } catch (error) {
             console.error('Error fetching follower/following list:', error);
             return response.status(500).json(ApiResponse.responseInternalServerError('An error occurred.'));
