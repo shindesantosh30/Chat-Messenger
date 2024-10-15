@@ -12,7 +12,7 @@ class UserController {
                 where: {
                     id: { [Op.ne]: userId }
                 },
-                attributes: { exclude: ['password', 'updatedAt', 'socketId', 'password'] }
+                attributes: { exclude: ['password', 'updatedAt', 'socketId',] }
             });
 
             const data = getPaginationResponse(queryset, request);

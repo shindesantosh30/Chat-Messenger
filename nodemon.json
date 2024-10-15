@@ -2,11 +2,11 @@
     "watch": [
         "."
     ],
+    "delay": "500",
     "ext": "js,json",
     "ignore": [
         "*.test.js",
         ".git",
         "node_modules"
-    ],
-    "quiet": true
+    ]
 }
