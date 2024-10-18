@@ -18,6 +18,21 @@ const socketService = (server) => {
             await handlePrivateMessage(socket, io, messageData);
         });
 
+        // Listen for group messages
+        socket.on('group message', async (messageData) => {
+            await handleGroupMessage(socket, io, messageData);
+        });
+
+        // Listen for user joining a group
+        socket.on('join group', (groupId) => {
+            handleJoinGroup(socket, groupId);
+        });
+
+        // Listen for user leaving a group
+        socket.on('leave group', (groupId) => {
+            handleLeaveGroup(socket, groupId);
+        });
+
         socket.on('typing', async (data) => {
             await handleTyping(io, data);
         });

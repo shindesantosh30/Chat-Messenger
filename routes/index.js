@@ -83,4 +83,20 @@ router.use('/api/followers', authGuard, async (req, res, next) => {
   followersRoutes(req, res, next);
 });
 
+router.use('/api/group', authGuard, async (req, res, next) => {
+  const groupRouter = require('./groupsRouter');
+  groupRouter(req, res, next);
+});
+
+router.use('/api/group-user', authGuard, async (req, res, next) => {
+  const groupUsersRoutes = require('./groupUsersRouter');
+  groupUsersRoutes(req, res, next);
+});
+
+router.use('/api/user-groups', authGuard, async (req, res, next) => {
+  const followersRoutes = require('./userGroupsRouter');
+  followersRoutes(req, res, next);
+});
+
+
 module.exports = router;
