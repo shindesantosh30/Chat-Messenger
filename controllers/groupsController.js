@@ -1,6 +1,8 @@
 const Group = require('../models/groups');
+const GroupUser = require('../models/groupUser');
 const apiResponse = require('../utillity/api_response');
 const { getRequiredFields } = require('../utillity/helper');
+const { fullTextSearch } = require('../utillity/db');
 
 class GroupsController {
     static async getInstance(pk) {
@@ -15,7 +17,17 @@ class GroupsController {
 
     static async get(request, response) {
         try {
-            const groups = await Group.findAll();
+            // Retrieve all groups
+            const whereClause = {
+                ...fullTextSearch(['name'], request.query.q), // Add search capability on 'name' field
+            };
+
+            // Fetch groups based on the constructed where clause
+            const groups = await Group.findAll({
+                where: whereClause,
+            });
+
+            // Return the fetched records in the response
             return response.status(200).json(apiResponse.responseOk(groups));
         } catch (error) {
             console.error("Error fetching groups:", error);
@@ -39,19 +51,35 @@ class GroupsController {
 
     static async post(request, response) {
         try {
-            const { name, description } = request.body;
-            const fieldError = getRequiredFields(["name"], request.body);
+            const { name, description, groupUsers } = request.body;
+            const fieldError = getRequiredFields(["name", "groupUsers"], request.body);
             if (fieldError) {
                 return response.status(400).json(apiResponse.responseBadRequest(fieldError));
             }
+            if (!Array.isArray(groupUsers)) {
+                return response.status(400).json(apiResponse.responseBadRequest("Please add the valid users"));
+            }
 
-            const newGroup = await Group.create({
+            const groupInstance = await Group.create({
                 name: name.trim(),
-                description: description,
+                description: description ? description.trim() : null,
                 createdBy: request.user.id
             });
 
-            return response.status(201).json(apiResponse.responseCreated(await GroupsController.transform(newGroup)));
+            const groupUsersData = [];
+
+            for (let index = 0; index < groupUsers.length; index++) {
+                groupUsersData.push({
+                    groupId: groupInstance.id,
+                    userId: groupUsers[index],
+                    isAdmin: groupUsers[index] === request.user.id
+                });
+            }
+
+            const groupUserInstances = await GroupUser.bulkCreate(groupUsersData);
+            console.log("groupUserInstances : ", groupUserInstances);
+            
+            return response.status(201).json(apiResponse.responseCreated("Group created successfully.", 201, true, await GroupsController.transform(groupInstance)));
         } catch (error) {
             console.error("Error creating group:", error);
             return response.status(500).json(apiResponse.responseInternalServerError(error));

@@ -32,7 +32,7 @@ const uploadFile = (req, res) => {
 
     const { originalname, path: absolutePath, size, mimetype } = req.file;
     const relativePath = path.relative(process.cwd(), absolutePath);
-    const fullUrl = `${req.protocol}://${req.get('host')}`;
+    const fullUrl = `${req.protocol}://${req.get('host')}/`;
 
     try {
       const fileInstance = await Asset.create({
@@ -45,7 +45,7 @@ const uploadFile = (req, res) => {
       res.status(200).json({
         message: 'File uploaded successfully',
         id: fileInstance.id,
-        filePath: relativePath,
+        filePath: fullUrl + relativePath,
         fileSize: formatFileSize(size),
         fileName: originalname,
         mimeType: mimetype,

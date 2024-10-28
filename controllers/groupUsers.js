@@ -4,6 +4,7 @@ const Group = require('../models/groups');
 const GroupUser = require('../models/groupUser');
 const User = require('../models/users');
 const apiResponse = require('../utillity/api_response');
+const { simpleSearch, fullTextSearch } = require('../utillity/db');
 
 class GroupUsersController {
     static modelClass = GroupUser;
@@ -32,14 +33,20 @@ class GroupUsersController {
 
     static async get(request, response) {
         try {
-            const userGrous = await GroupUser.findAll({
-                where: {
-                    userId: request.user.id,
-                },
+    
+            const whereClause = {
+                userId: request.user.id,
+                ...fullTextSearch(['name',], request.query.q),
+            };
+    
+            const userGroups = await GroupUser.findAll({
+                where: whereClause,
             });
-            return response.status(200).json(apiResponse.responseOk(userGrous));
+    
+            // Return the fetched records in the response
+            return response.status(200).json(apiResponse.responseOk(userGroups));
         } catch (error) {
-            console.error("Error fetching userGrous:", error);
+            console.error("Error fetching userGroups:", error);
             return response.status(500).json(apiResponse.responseInternalServerError(error));
         }
     }
