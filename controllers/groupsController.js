@@ -17,23 +17,34 @@ class GroupsController {
 
     static async get(request, response) {
         try {
-            // Retrieve all groups
-            const whereClause = {
-                ...fullTextSearch(['name'], request.query.q), // Add search capability on 'name' field
-            };
+            const whereClause = request.query.q ? fullTextSearch(['name'], request.query.q) : {};
 
-            // Fetch groups based on the constructed where clause
-            const groups = await Group.findAll({
-                where: whereClause,
+            const userGroups = await GroupUser.findAll({
+                where: {
+                    userId: request.user.id,
+                },
+                attributes: ['groupId', 'isAdmin'],
+                include: [
+                    {
+                        model: Group,
+                        as: 'group',
+                        where: whereClause,
+                        attributes: ['id', 'name', 'description', 'createdBy', 'createdAt', 'updatedAt']
+                    }
+                ]
             });
 
-            // Return the fetched records in the response
-            return response.status(200).json(apiResponse.responseOk(groups));
+            const transformedGroups = await Promise.all(
+                userGroups.map(GroupsController.transformUserGroups)
+            );
+
+            return response.status(200).json(apiResponse.responseOk(transformedGroups));
         } catch (error) {
             console.error("Error fetching groups:", error);
-            return response.status(500).json(apiResponse.responseInternalServerError(error));
+            return response.status(500).json(apiResponse.responseInternalServerError(error.message));
         }
     }
+
 
     static async getById(request, response) {
         try {
@@ -78,7 +89,7 @@ class GroupsController {
 
             const groupUserInstances = await GroupUser.bulkCreate(groupUsersData);
             console.log("groupUserInstances : ", groupUserInstances);
-            
+
             return response.status(201).json(apiResponse.responseCreated("Group created successfully.", 201, true, await GroupsController.transform(groupInstance)));
         } catch (error) {
             console.error("Error creating group:", error);
@@ -144,6 +155,18 @@ class GroupsController {
             createdBy: instance.createdBy,
             createdAt: instance.createdAt,
             updatedAt: instance.updatedAt,
+        };
+    }
+
+    static async transformUserGroups(instance) {
+        return {
+            id: instance.group.id,
+            name: instance.group.name,
+            description: instance.group.description,
+            createdBy: instance.group.createdBy,
+            isAdmin: instance.isAdmin,
+            createdAt: instance.group.createdAt,
+            updatedAt: instance.group.updatedAt,
         };
     }
 }
