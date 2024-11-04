@@ -17,11 +17,14 @@ A real-time chat application built with Node.js, offering dynamic messaging capa
    git clone git@github.com:shindesantosh30/Chat-Messenger.git
 
 2. **Navigate to the project directory**:
-
    ```bash
    cd Chat-Messenger
 
 3. **Install the dependencies**:
-
    ```bash
    npm install
+
+
+3. **Start the application**:
+   ```bash
+   nodemon
